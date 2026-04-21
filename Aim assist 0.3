@@ -1,13 +1,15 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 -- ======================
 -- SETTINGS
 -- ======================
+local aimEnabled = true
 local aimStrength = 0.10
-local MIN = 0.10
-local MAX = 2
+local MIN, MAX = 0.10, 1
 local STEP = 0.01
 
 local aimPart = "Head"
@@ -21,7 +23,7 @@ gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 200, 0, 150)
+frame.Size = UDim2.new(0, 200, 0, 180)
 frame.Position = UDim2.new(0, 50, 0, 200)
 frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 frame.Active = true
@@ -33,6 +35,7 @@ title.Text = "Aim Settings"
 title.BackgroundTransparency = 1
 title.TextColor3 = Color3.new(1,1,1)
 
+-- strength label
 local label = Instance.new("TextLabel", frame)
 label.Size = UDim2.new(1, 0, 0, 25)
 label.Position = UDim2.new(0, 0, 0, 35)
@@ -40,23 +43,32 @@ label.Text = "Strength: " .. string.format("%.2f", aimStrength)
 label.BackgroundTransparency = 1
 label.TextColor3 = Color3.new(1,1,1)
 
+-- minus
 local minus = Instance.new("TextButton", frame)
 minus.Size = UDim2.new(0.4, 0, 0, 30)
 minus.Position = UDim2.new(0.05, 0, 0, 70)
 minus.Text = "-1"
 
+-- plus
 local plus = Instance.new("TextButton", frame)
 plus.Size = UDim2.new(0.4, 0, 0, 30)
 plus.Position = UDim2.new(0.55, 0, 0, 70)
 plus.Text = "+1"
 
+-- switch target
 local switch = Instance.new("TextButton", frame)
 switch.Size = UDim2.new(0.9, 0, 0, 30)
 switch.Position = UDim2.new(0.05, 0, 0, 110)
 switch.Text = "Target: Head"
 
+-- toggle aim
+local toggle = Instance.new("TextButton", frame)
+toggle.Size = UDim2.new(0.9, 0, 0, 30)
+toggle.Position = UDim2.new(0.05, 0, 0, 145)
+toggle.Text = "Aim: ON"
+
 -- ======================
--- LOGIC
+-- UI LOGIC
 -- ======================
 local function update()
 	label.Text = "Strength: " .. string.format("%.2f", aimStrength)
@@ -81,8 +93,13 @@ switch.MouseButton1Click:Connect(function()
 	switch.Text = "Target: " .. (aimPart == "Head" and "Head" or "Body")
 end)
 
+toggle.MouseButton1Click:Connect(function()
+	aimEnabled = not aimEnabled
+	toggle.Text = "Aim: " .. (aimEnabled and "ON" or "OFF")
+end)
+
 -- ======================
--- AIM SYSTEM
+-- TARGET SYSTEM
 -- ======================
 local function getTarget()
 	local closest
@@ -109,7 +126,12 @@ local function getTarget()
 	return closest
 end
 
-game:GetService("RunService").RenderStepped:Connect(function()
+-- ======================
+-- AIM LOOP
+-- ======================
+RunService.RenderStepped:Connect(function()
+	if not aimEnabled then return end
+
 	local target = getTarget()
 	if target then
 		camera.CFrame = camera.CFrame:Lerp(
