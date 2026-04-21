@@ -30,113 +30,40 @@ frame.Active = true
 frame.Draggable = true
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Size = UDim2.new(1, 0, 0, 25)
 title.Text = "Aim Settings"
 title.BackgroundTransparency = 1
 title.TextColor3 = Color3.new(1,1,1)
 
--- strength label
 local label = Instance.new("TextLabel", frame)
 label.Size = UDim2.new(1, 0, 0, 25)
-label.Position = UDim2.new(0, 0, 0, 35)
+label.Position = UDim2.new(0, 0, 0, 25)
 label.Text = "Strength: " .. string.format("%.2f", aimStrength)
 label.BackgroundTransparency = 1
 label.TextColor3 = Color3.new(1,1,1)
 
--- minus
 local minus = Instance.new("TextButton", frame)
 minus.Size = UDim2.new(0.4, 0, 0, 30)
-minus.Position = UDim2.new(0.05, 0, 0, 70)
+minus.Position = UDim2.new(0.05, 0, 0, 55)
 minus.Text = "-1"
 
--- plus
 local plus = Instance.new("TextButton", frame)
 plus.Size = UDim2.new(0.4, 0, 0, 30)
-plus.Position = UDim2.new(0.55, 0, 0, 70)
+plus.Position = UDim2.new(0.55, 0, 0, 55)
 plus.Text = "+1"
 
--- switch target
 local switch = Instance.new("TextButton", frame)
 switch.Size = UDim2.new(0.9, 0, 0, 30)
-switch.Position = UDim2.new(0.05, 0, 0, 110)
+switch.Position = UDim2.new(0.05, 0, 0, 95)
 switch.Text = "Target: Head"
 
--- toggle aim
 local toggle = Instance.new("TextButton", frame)
 toggle.Size = UDim2.new(0.9, 0, 0, 30)
-toggle.Position = UDim2.new(0.05, 0, 0, 145)
+toggle.Position = UDim2.new(0.05, 0, 0, 135)
 toggle.Text = "Aim: ON"
 
--- ======================
--- UI LOGIC
--- ======================
-local function update()
-	label.Text = "Strength: " .. string.format("%.2f", aimStrength)
-end
-
-minus.MouseButton1Click:Connect(function()
-	aimStrength = math.clamp(aimStrength - STEP, MIN, MAX)
-	update()
-end)
-
-plus.MouseButton1Click:Connect(function()
-	aimStrength = math.clamp(aimStrength + STEP, MIN, MAX)
-	update()
-end)
-
-switch.MouseButton1Click:Connect(function()
-	if aimPart == "Head" then
-		aimPart = "HumanoidRootPart"
-	else
-		aimPart = "Head"
-	end
-	switch.Text = "Target: " .. (aimPart == "Head" and "Head" or "Body")
-end)
-
-toggle.MouseButton1Click:Connect(function()
-	aimEnabled = not aimEnabled
-	toggle.Text = "Aim: " .. (aimEnabled and "ON" or "OFF")
-end)
-
--- ======================
--- TARGET SYSTEM
--- ======================
-local function getTarget()
-	local closest
-	local dist = math.huge
-
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr ~= player and plr.Character then
-			local char = plr.Character
-			local hum = char:FindFirstChild("Humanoid")
-			local part = char:FindFirstChild(aimPart)
-
-			if hum and hum.Health > 0 and part then
-				local pos = camera:WorldToViewportPoint(part.Position)
-				local mag = (Vector2.new(pos.X,pos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
-
-				if mag < dist then
-					dist = mag
-					closest = part
-				end
-			end
-		end
-	end
-
-	return closest
-end
-
--- ======================
--- AIM LOOP
--- ======================
-RunService.RenderStepped:Connect(function()
-	if not aimEnabled then return end
-
-	local target = getTarget()
-	if target then
-		camera.CFrame = camera.CFrame:Lerp(
-			CFrame.new(camera.CFrame.Position, target.Position),
-			aimStrength
-		)
-	end
-end)
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 25, 0, 25)
+close.Position = UDim2.new(1, -30, 0, 5)
+close.Text = "X"
+close
